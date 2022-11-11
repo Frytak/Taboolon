@@ -1,23 +1,63 @@
+<!-- @format -->
+
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link href="style.css" rel="stylesheet">
-    <title>Document</title>
-</head>
-<body>
-    <img id="cat" src="yeah.jpg" alt="kotek">
-    <canvas id="canvas"></canvas>
-    <table id="table">
-        <!-- <tr>
-            <td style="background-color: aliceblue;"></td>
-            <td></td>
-            <td></td>
-            <td></td>
-        </tr> -->
-    </table>
-</body>
-<script src="index.js"></script>
+	<head>
+		<meta charset="UTF-8" />
+		<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<link href="index.css" rel="stylesheet" />
+		<title>Document</title>
+
+		<link rel="preconnect" href="https://fonts.googleapis.com" />
+		<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+		<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@100;200;300&display=swap" rel="stylesheet" />
+
+		<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
+	</head>
+	<body>
+		<canvas id="canvas"></canvas>
+
+		<main>
+			<div class="info">
+				<h1>Taboolon</h1>
+				<p>Website converting images to tables of various sizes.</p>
+				<p>
+					Mady by
+					<a href="https://github.com/Frytak" target="_blank">Frytak</a>
+				</p>
+			</div>
+			<div class="bottom">
+				<div class="inputImage">
+					<label id="inputImageLabel" for="inputImage">
+						Choose a file
+						<svg id="uploadImage" xmlns="http://www.w3.org/2000/svg" fill="currentColor" class="bi bi-file-earmark-arrow-up-fill" viewBox="0 0 16 16">
+							<path
+								d="M9.293 0H4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2V4.707A1 1 0 0 0 13.707 4L10 .293A1 1 0 0 0 9.293 0zM9.5 3.5v-2l3 3h-2a1 1 0 0 1-1-1zM6.354 9.854a.5.5 0 0 1-.708-.708l2-2a.5.5 0 0 1 .708 0l2 2a.5.5 0 0 1-.708.708L8.5 8.707V12.5a.5.5 0 0 1-1 0V8.707L6.354 9.854z"
+							/>
+						</svg>
+						<input id="inputImage" type="file" />
+					</label>
+				</div>
+				<div class="transformSection">
+					<div class="arrows">
+						<svg id="firstArrow" xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+							<path d="m12.14 8.753-5.482 4.796c-.646.566-1.658.106-1.658-.753V3.204a1 1 0 0 1 1.659-.753l5.48 4.796a1 1 0 0 1 0 1.506z" />
+						</svg>
+						<svg id="secondArrow" xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+							<path d="m12.14 8.753-5.482 4.796c-.646.566-1.658.106-1.658-.753V3.204a1 1 0 0 1 1.659-.753l5.48 4.796a1 1 0 0 1 0 1.506z" />
+						</svg>
+						<svg id="thirdArrow" xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+							<path d="m12.14 8.753-5.482 4.796c-.646.566-1.658.106-1.658-.753V3.204a1 1 0 0 1 1.659-.753l5.48 4.796a1 1 0 0 1 0 1.506z" />
+						</svg>
+					</div>
+					<button id="transform">Transform</button>
+				</div>
+				<div class="output">
+					<table id="table"></table>
+				</div>
+			</div>
+		</main>
+	</body>
+	<!-- <script src="index.js"></script> -->
 </html>
