@@ -113,10 +113,18 @@ main {
 }
 
 /* Image Input Section */
+img {
+	width: 100%;
+	height: 100%;
+	object-fit: contain;
+}
+
 .inputImage {
 	display: flex;
-	justify-content: flex-end;
-	align-items: center;
+	flex-direction: column;
+	justify-content: center;
+	align-items: flex-end;
+	gap: 1rem;
 }
 
 #inputImage {
@@ -124,12 +132,13 @@ main {
 }
 
 #inputImageLabel {
-	width: 16rem;
-	height: 16rem;
+	width: 32rem;
+	height: 32rem;
 	display: flex;
 	flex-direction: column;
 	justify-content: center;
 	align-items: center;
+	font-size: 1.6rem;
 	gap: 1rem;
 	border: 0.2rem dashed var(--primary);
 	border-radius: var(--roundedLg);
@@ -137,9 +146,46 @@ main {
 	background-color: var(--depth1);
 }
 
-#uploadImage {
-	width: 4rem;
-	height: 4rem;
+#inputImageSvg {
+	width: 6rem;
+	height: 6rem;
+}
+
+#scaleControls {
+	width: 32rem;
+	display: flex;
+	flex-direction: row;
+	justify-content: center;
+	align-items: center;
+	gap: 1rem;
+}
+
+.scaleControls > button {
+	padding: 0.3rem;
+	border-radius: var(--rounded);
+	background-color: var(--primary);
+	font-size: 1.2rem;
+	cursor: pointer;
+}
+
+.scaleControls > button:hover {
+	background-color: var(--primaryHover);
+}
+
+.scaleControls > button:active {
+	background-color: var(--primaryActive);
+}
+
+.selected {
+	background-color: var(--secondaryActive) !important;
+}
+
+#inputImageInfo {
+	width: 32rem;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	height: calc(21px * 2);
 }
 
 /* Transform section */
@@ -159,8 +205,8 @@ main {
 }
 
 .arrows > * {
-	width: 2rem;
-	height: 2rem;
+	width: 2.6rem;
+	height: 2.6rem;
 }
 
 /* Output section */
@@ -180,30 +226,30 @@ main {
 */
 
 #firstArrow {
-	animation: arrowsTransforming 0.9s infinite;
+	animation: arrowsTransforming 1.8s infinite;
 }
 
 #secondArrow {
-	animation: arrowsTransforming 0.9s infinite;
-	animation-delay: 1s;
+	animation: arrowsTransforming 1.8s infinite;
+	animation-delay: 0.2s;
 }
 
 #thirdArrow {
-	animation: arrowsTransforming 0.9s infinite;
-	animation-delay: 2s;
+	animation: arrowsTransforming 1.8s infinite;
+	animation-delay: 0.4s;
 }
 
 @keyframes arrowsTransforming {
 	0% {
-		filter: brightness(0.5);
-		transform: translateY(-0.1rem);
+		filter: opacity(0);
+		transform: translateY(-0.15rem);
 	}
 	50% {
-		filter: brightness(1);
+		filter: opacity(1);
 		transform: translateY(0rem);
 	}
 	100% {
-		filter: brightness(0.5);
-		transform: translateY(-0.1rem);
+		filter: opacity(0);
+		transform: translateY(-0.15rem);
 	}
 }
