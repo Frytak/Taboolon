@@ -117,6 +117,9 @@ transform.addEventListener('click', () => {
 			tr.appendChild(td);
 		}
 	}
+	// const data = new Blob(['<p style="background-color: red;">test</p>'], { type: 'text/html' });
+	// const item = new ClipboardItem({ 'text/html': data });
+	// navigator.clipboard.write([item]);
 
-	navigator.clipboard.writeText(table.innerText);
+	navigator.clipboard.write([new ClipboardItem({ 'text/html': new Blob([table.outerHTML], { type: 'text/html' }) })]);
 });
