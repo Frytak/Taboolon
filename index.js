@@ -1,36 +1,41 @@
 /** @format */
 
 const canvas = document.getElementById('canvas');
-const ctx = canvas.getContext('2d');
+const ctx = canvas.getContext('2d', { willReadFrequently: true });
 const inputImage = document.getElementById('inputImage');
 const inputImageLabel = document.getElementById('inputImageLabel');
 const reader = new FileReader();
 const image = new Image();
-let downScale = 12;
+let root = document.querySelector(':root');
+let downScale;
 
 // Loading image
 inputImage.addEventListener('change', (e) => {
 	let img = document.createElement('img');
 
-	reader.onloadend = function () {
+	reader.onload = () => {
 		image.src = reader.result;
-		img.src = image.src;
 
-		// Show image that will be transformed
-		inputImageLabel.replaceChildren(img);
+		image.onload = () => {
+			img.src = image.src;
 
-		// Set image label for initial size
-		let inputImageInitSize = document.getElementById('inputImageInitSize');
-		let text = document.createTextNode(`Initial dimensions: ${image.width} x ${image.height}`);
-		inputImageInitSize.replaceChildren(text);
+			// Show image that will be transformed
+			inputImageLabel.replaceChildren(img);
 
-		// Set image label for downscale size
-		let inputImageTransSize = document.getElementById('inputImageTransSize');
-		text = document.createTextNode(`After transformation: ${Math.floor(image.width / downScale)} x ${Math.floor(image.height / downScale)}`);
-		inputImageTransSize.replaceChildren(text);
+			console.log(image.width, image.height);
+			// Set image label for initial size
+			let inputImageInitSize = document.getElementById('inputImageInitSize');
+			let text = document.createTextNode(`Initial dimensions: ${image.width} x ${image.height}`);
+			inputImageInitSize.replaceChildren(text);
 
-		canvas.width = image.width / downScale;
-		canvas.height = image.height / downScale;
+			// Set image label for downscale size
+			let inputImageTransSize = document.getElementById('inputImageTransSize');
+			text = document.createTextNode(`After transformation: ${Math.floor(image.width / downScale)} x ${Math.floor(image.height / downScale)}`);
+			inputImageTransSize.replaceChildren(text);
+
+			canvas.width = image.width / downScale;
+			canvas.height = image.height / downScale;
+		};
 	};
 
 	// Read in the image file as a data URL
@@ -76,8 +81,9 @@ let arrows = [document.getElementById('firstArrow'), document.getElementById('se
 transform.addEventListener('click', () => {
 	const pixels = [];
 
-	// Reset the table
+	// Reset the table and set pixel size
 	table.innerHTML = '';
+	root.style.setProperty('--tdScale', `${(downScale * 512) / Math.max(image.width, image.height)}px`);
 	// Draw the image on the canvas
 	ctx.drawImage(image, 0, 0, canvas.width, canvas.height);
 	// Get the new scaled image data
@@ -85,7 +91,7 @@ transform.addEventListener('click', () => {
 
 	// Get all the rows
 	let rows = [];
-	for (let j = 0; j < canvas.width * 4 * canvas.height * canvas.width; j += 4) {
+	for (let j = 0; j < canvas.width * canvas.height * 4; j += 4) {
 		rows.push({
 			r: imageData[j],
 			g: imageData[j + 1],
@@ -95,7 +101,7 @@ transform.addEventListener('click', () => {
 	}
 
 	// Asign rows to their height
-	for (let i = 0; i < rows.length / canvas.width; i += canvas.width) {
+	for (let i = 0; i < canvas.width * canvas.width; i += canvas.width) {
 		pixels.push(rows.slice(i, i + canvas.width));
 	}
 
@@ -111,4 +117,6 @@ transform.addEventListener('click', () => {
 			tr.appendChild(td);
 		}
 	}
+
+	navigator.clipboard.writeText(table.innerText);
 });

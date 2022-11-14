@@ -18,6 +18,9 @@
 
 	--rounded: 5px;
 	--roundedLg: 10px;
+
+	--scale: 32rem;
+	--tdScale: 0.2rem;
 }
 
 * {
@@ -43,11 +46,14 @@ table {
 	border-collapse: collapse;
 }
 
+tr {
+	height: 0.02px;
+}
+
 td {
-	--scale: 0.2;
-	font-size: calc(1rem * var(--scale));
-	width: calc(22px * var(--scale));
-	height: calc(20px * var(--scale));
+	font-size: 0.5px;
+	width: var(--tdScale);
+	height: var(--tdScale);
 }
 
 *:focus {
@@ -132,13 +138,13 @@ img {
 }
 
 #inputImageLabel {
-	width: 32rem;
-	height: 32rem;
+	width: var(--scale);
+	height: var(--scale);
 	display: flex;
 	flex-direction: column;
 	justify-content: center;
 	align-items: center;
-	font-size: 1.6rem;
+	font-size: calc(1.6rem * (var(--scale) / 32rem));
 	gap: 1rem;
 	border: 0.2rem dashed var(--primary);
 	border-radius: var(--roundedLg);
@@ -151,8 +157,8 @@ img {
 	height: 6rem;
 }
 
-#scaleControls {
-	width: 32rem;
+.scaleControls {
+	width: var(--scale);
 	display: flex;
 	flex-direction: row;
 	justify-content: center;
@@ -181,7 +187,7 @@ img {
 }
 
 #inputImageInfo {
-	width: 32rem;
+	width: var(--scale);
 	display: flex;
 	flex-direction: column;
 	align-items: center;
@@ -216,6 +222,14 @@ img {
 	display: flex;
 	flex-direction: column;
 	justify-content: center;
+	align-items: flex-start;
+}
+
+.aspectRatio {
+	width: 32rem;
+	height: 32rem;
+	display: flex;
+	justify-content: flex-start;
 	align-items: center;
 }
 
@@ -251,5 +265,36 @@ img {
 	100% {
 		filter: opacity(0);
 		transform: translateY(-0.15rem);
+	}
+}
+
+@media (max-width: 1699px) {
+	:root {
+		--scale: 26rem;
+	}
+}
+
+@media (max-width: 1499px) {
+	:root {
+		--scale: 24rem;
+	}
+}
+
+@media (max-width: 1229px) {
+	:root {
+		--scale: 18rem;
+	}
+
+	.scaleControls > button {
+		padding: 0.2rem;
+		font-size: 1rem;
+	}
+
+	#inputImageInfo {
+		font-size: 0.8rem;
+	}
+
+	.scaleControls {
+		gap: 0.5rem;
 	}
 }
