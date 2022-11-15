@@ -17,7 +17,11 @@
 		<main>
 			<div class="info">
 				<h1>Taboolon</h1>
-				<p>Website converting images to tables of various sizes.</p>
+				<p>
+					Website converting images to tables of various sizes that later can be inserted into Excel. Watch out! If the image is of large size it may take a while to generate a table, lag while
+					copying and use a lot of RAM. That's why there are compression options! 1x is going to be the original, 2x is going to have two times less pixels on the width and height. (I suggest not
+					going above 400 x 400 pixels).
+				</p>
 				<p>
 					Mady by
 					<a href="https://github.com/Frytak" target="_blank">Frytak</a>
@@ -25,40 +29,57 @@
 			</div>
 			<div class="bottom">
 				<div class="inputImage">
-					<label id="inputImageLabel" for="inputImage">
-						<svg id="inputImageSvg" xmlns="http://www.w3.org/2000/svg" fill="currentColor" class="bi bi-file-earmark-arrow-up-fill" viewBox="0 0 16 16">
-							<path
-								d="M9.293 0H4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2V4.707A1 1 0 0 0 13.707 4L10 .293A1 1 0 0 0 9.293 0zM9.5 3.5v-2l3 3h-2a1 1 0 0 1-1-1zM6.354 9.854a.5.5 0 0 1-.708-.708l2-2a.5.5 0 0 1 .708 0l2 2a.5.5 0 0 1-.708.708L8.5 8.707V12.5a.5.5 0 0 1-1 0V8.707L6.354 9.854z"
-							/>
-						</svg>
-						<p>Choose an image</p>
-					</label>
-					<input id="inputImage" type="file" accept="image/png, image/jpeg" />
-					<div id="scaleControls" class="scaleControls">
-						<button>1x</button>
-						<button>2x</button>
-						<button>4x</button>
-						<button>8x</button>
-						<button>12x</button>
-						<button>24x</button>
-						<button>32x</button>
+					<div class="firstItem">
+						<label class="inputImageLabel" for="inputImage">
+							<svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" class="bi bi-file-earmark-arrow-up-fill" viewBox="0 0 16 16">
+								<path
+									d="M9.293 0H4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2V4.707A1 1 0 0 0 13.707 4L10 .293A1 1 0 0 0 9.293 0zM9.5 3.5v-2l3 3h-2a1 1 0 0 1-1-1zM6.354 9.854a.5.5 0 0 1-.708-.708l2-2a.5.5 0 0 1 .708 0l2 2a.5.5 0 0 1-.708.708L8.5 8.707V12.5a.5.5 0 0 1-1 0V8.707L6.354 9.854z"
+								/>
+							</svg>
+							<p>Choose an image</p>
+						</label>
+						<input id="inputImage" type="file" accept="image/png, image/jpeg" />
 					</div>
-					<div id="inputImageInfo">
-						<p id="inputImageInitSize"></p>
-						<p id="inputImageTransSize"></p>
+
+					<div class="secondItem">
+						<div class="inputImageFooter">
+							<div id="scaleControls">
+								<button>1x</button>
+								<button>2x</button>
+								<button>4x</button>
+								<button>8x</button>
+								<button>12x</button>
+								<button>24x</button>
+								<button>32x</button>
+							</div>
+							<div class="inputImageInfo">
+								<p id="inputImageInitSize"></p>
+								<p id="inputImageTransSize"></p>
+							</div>
+						</div>
 					</div>
 				</div>
 				<div class="transformSection">
-					<div class="arrows">
-						<img id="firstArrow" src="arrow.svg" alt=">" />
-						<img id="secondArrow" src="arrow.svg" alt=">" />
-						<img id="thirdArrow" src="arrow.svg" alt=">" />
+					<div class="firstItem">
+						<div class="arrows">
+							<img id="firstArrow" class="disableAnimation" src="arrow.svg" alt=">" />
+							<img id="secondArrow" class="disableAnimation" src="arrow.svg" alt=">" />
+							<img id="thirdArrow" class="disableAnimation" src="arrow.svg" alt=">" />
+						</div>
+
+						<button id="transform">Transform</button>
 					</div>
-					<button id="transform">Transform</button>
 				</div>
 				<div class="output">
-					<div class="aspectRatio">
-						<canvas id="canvas"></canvas>
+					<div class="firstItem">
+						<div class="aspectRatio">
+							<canvas id="canvas"></canvas>
+						</div>
+					</div>
+					<div class="secondItem">
+						<div class="outputImageFooter">
+							<button id="copyTable">Copy Table</button>
+						</div>
 					</div>
 				</div>
 			</div>

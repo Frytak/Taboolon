@@ -3,12 +3,11 @@
 const canvas = document.getElementById('canvas');
 const ctx = canvas.getContext('2d', { willReadFrequently: true });
 const inputImage = document.getElementById('inputImage');
-const inputImageLabel = document.getElementById('inputImageLabel');
+const inputImageLabel = document.querySelector('.inputImageLabel');
 const reader = new FileReader();
 const image = new Image();
 let root = document.querySelector(':root');
 let downScale;
-ctx.imageSmoothingEnabled = false;
 
 // Loading image
 inputImage.addEventListener('change', (e) => {
@@ -48,7 +47,6 @@ inputImage.addEventListener('change', (e) => {
 });
 
 const transform = document.getElementById('transform');
-//const table = document.getElementById('table');
 const scaleControls = document.getElementById('scaleControls');
 
 // Changing the scale
@@ -77,62 +75,62 @@ scaleControls.childNodes.forEach((button) => {
 });
 
 let arrows = [document.getElementById('firstArrow'), document.getElementById('secondArrow'), document.getElementById('thirdArrow')];
+let table = document.createElement('table');
 
 // Transforming the image
 transform.addEventListener('click', () => {
-	const pixels = [];
+	let pixels = [];
+	table.innerHTML = '';
 
-	// Reset the table and set pixel size
-	//table.innerHTML = '';
-	root.style.setProperty('--tdScale', `${(downScale * 512) / Math.max(image.width, image.height)}px`);
-	// Draw the image on the canvas
-	ctx.mozImageSmoothingEnabled = false;
-	ctx.webkitImageSmoothingEnabled = false;
-	ctx.msImageSmoothingEnabled = false;
-	ctx.imageSmoothingEnabled = false;
-	console.log(ctx.imageSmoothingEnabled);
-	ctx.drawImage(image, 0, 0, canvas.width, canvas.height);
-	// Get the new scaled image data
-	const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height).data;
+	arrows.forEach((arrow) => {
+		arrow.classList.remove('disableAnimation');
+	});
 
-	// Get all the rows
-	let rows = [];
-	for (let j = 0; j < canvas.width * canvas.height * 4; j += 4) {
-		rows.push({
-			r: imageData[j],
-			g: imageData[j + 1],
-			b: imageData[j + 2],
-			t: imageData[j + 3]
-		});
-	}
+	// Timeout so the animation has time to load
+	window.setTimeout(() => {
+		// Draw the image on the canvas
+		ctx.drawImage(image, 0, 0, canvas.width, canvas.height);
+		// Get the new scaled image data
+		const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height).data;
 
-	console.log(rows);
-
-	// Asign rows to their height
-	for (let i = 0; i < canvas.width * canvas.height; i += canvas.width) {
-		pixels.push(rows.slice(i, i + canvas.width));
-	}
-
-	console.log(pixels);
-
-	// Draw to the table
-	let table = document.createElement('table');
-	for (let i = 0; i < canvas.height; i++) {
-		let tr = document.createElement('tr');
-		table.appendChild(tr);
-
-		for (let j = 0; j < canvas.width; j++) {
-			let td = document.createElement('td');
-			td.appendChild(document.createTextNode('⠀'));
-			td.style.backgroundColor = `rgb(${pixels[i][j].r}, ${pixels[i][j].g}, ${pixels[i][j].b})`;
-			tr.appendChild(td);
+		// Get all the rows
+		let rows = [];
+		for (let j = 0; j < canvas.width * canvas.height * 4; j += 4) {
+			rows.push({
+				r: imageData[j],
+				g: imageData[j + 1],
+				b: imageData[j + 2],
+				t: imageData[j + 3]
+			});
 		}
-	}
-	console.log(table.outerHTML);
-	// const data = new Blob(['<p style="background-color: red;">test</p>'], { type: 'text/html' });
-	// const item = new ClipboardItem({ 'text/html': data });
-	// navigator.clipboard.write([item]);
 
+		// Asign rows to their height
+		for (let i = 0; i < canvas.width * canvas.height; i += canvas.width) {
+			pixels.push(rows.slice(i, i + canvas.width));
+		}
+
+		// Draw to the table
+		for (let i = 0; i < canvas.height; i++) {
+			let tr = document.createElement('tr');
+			table.appendChild(tr);
+
+			for (let j = 0; j < canvas.width; j++) {
+				let td = document.createElement('td');
+				td.appendChild(document.createTextNode('⠀'));
+				td.style.backgroundColor = `rgb(${pixels[i][j].r}, ${pixels[i][j].g}, ${pixels[i][j].b})`;
+				tr.appendChild(td);
+			}
+		}
+
+		console.log(table);
+
+		arrows.forEach((arrow) => {
+			arrow.classList.add('disableAnimation');
+		});
+	}, 50);
+});
+
+let copyTable = document.getElementById('copyTable');
+copyTable.addEventListener('click', () => {
 	navigator.clipboard.write([new ClipboardItem({ 'text/html': new Blob([table.outerHTML], { type: 'text/html' }) })]);
-	// console.log(table.outerHTML, '\n\n\n', table.innerHTML);
 });
