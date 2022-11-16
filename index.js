@@ -3,7 +3,7 @@
 const canvas = document.getElementById('canvas');
 const ctx = canvas.getContext('2d', { willReadFrequently: true });
 const inputImage = document.getElementById('inputImage');
-const inputImageLabel = document.querySelector('.inputImageLabel');
+const inputImageLabel = document.querySelector('.inputImage > label');
 const reader = new FileReader();
 const image = new Image();
 let root = document.querySelector(':root');

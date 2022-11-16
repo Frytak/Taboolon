@@ -19,7 +19,7 @@
 	--rounded: 5px;
 	--roundedLg: 10px;
 
-	--scale: 32rem;
+	--scale: 24rem;
 	--tdScale: 0.2rem;
 }
 
@@ -111,9 +111,162 @@ main {
 	height: 75%;
 	display: grid;
 	grid-template-columns: 1fr 24rem 1fr;
+	grid-template-rows: 75% 25%;
 }
 
-/* Image Input Section */
+.bottom > div {
+	width: 100%;
+	height: 100%;
+}
+
+.inputImage {
+	grid-column: 1 / 2;
+	grid-row: 1 / 2;
+	display: flex;
+	justify-content: flex-end;
+	align-items: center;
+}
+
+.inputImage > label,
+.outputImage > div {
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+	align-items: center;
+	gap: 1rem;
+	width: var(--scale);
+	height: var(--scale);
+	font-size: calc(1.6rem * (var(--scale) / 32rem));
+	border: 0.2rem dashed var(--primary);
+	border-radius: var(--roundedLg);
+	cursor: pointer;
+	background-color: var(--depth1);
+}
+
+.inputImage > input {
+	display: none;
+}
+
+.inputImage > label > img {
+	width: 100%;
+	height: 100%;
+	object-fit: contain;
+}
+
+.inputImage > label > svg {
+	width: 6rem;
+	height: 6rem;
+}
+
+.inputImageFooter,
+.outputImageFooter {
+	grid-column: 1 / 2;
+	grid-row: 2 / 3;
+	display: flex;
+	flex-direction: column;
+	justify-content: flex-start;
+	align-items: flex-end;
+	gap: 1rem;
+}
+
+.inputImageFooter:first-child {
+	width: var(--scale);
+	display: flex;
+	flex-direction: row;
+	justify-content: center;
+	align-items: center;
+	gap: 1rem;
+}
+
+.inputImageFooter > div > button,
+.outputImageFooter > div > button {
+	padding: 0.4rem;
+	background-color: var(--primary);
+	border-radius: var(--rounded);
+}
+
+.inputImageFooter > div > button:hover,
+.outputImageFooter > div > button:hover {
+	background-color: var(--primaryHover);
+}
+
+.inputImageFooter > div > button:active,
+.outputImageFooter > div > button:active {
+	background-color: var(--primaryActive);
+}
+
+.inputImageInfo {
+	width: var(--scale);
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+}
+
+#scaleControls {
+	width: var(--scale);
+	display: flex;
+}
+
+.selected {
+	background-color: var(--secondaryActive) !important;
+}
+
+.transformSection {
+	grid-column: 2 / 3;
+	grid-row: 1 / 2;
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+	align-items: center;
+}
+
+.arrows > img {
+	width: 3rem;
+	height: 3rem;
+}
+
+#transform {
+	padding: 0.5rem;
+	font-size: 1.6rem;
+	background: linear-gradient(15deg, rgba(12, 127, 157, 1) 40%, rgba(122, 255, 235, 1) 100%);
+	border-radius: var(--rounded);
+}
+
+#transform:hover {
+	cursor: pointer;
+}
+
+.outputImage {
+	grid-column: 3 / 4;
+	grid-row: 1 / 2;
+	display: flex;
+	justify-content: flex-start;
+	align-items: center;
+}
+
+.outputImage > div {
+	gap: 0;
+}
+
+.outputImageFooter {
+	grid-column: 3 / 4;
+	grid-row: 2 / 3;
+	align-items: flex-start;
+}
+
+.outputImageFooter > div {
+	width: var(--scale);
+	display: flex;
+	justify-content: center;
+	align-items: center;
+}
+
+/* .bottom {
+	height: 75%;
+	display: grid;
+	grid-template-columns: 1fr 24rem 1fr;
+}
+
 img {
 	width: 100%;
 	height: 100%;
@@ -219,7 +372,6 @@ img {
 	height: calc(21px * 2);
 }
 
-/* Transform section */
 .transformSection {
 	display: grid;
 	grid-template-rows: 75% 25%;
@@ -250,7 +402,6 @@ img {
 	height: 2.6rem;
 }
 
-/* Output section */
 .output {
 	display: grid;
 	grid-template-rows: 75% 25%;
@@ -271,25 +422,17 @@ img {
 }
 
 .outputImageFooter {
-	width: 32rem;
+	width: var(--scale);
 	display: flex;
 	justify-content: center;
 	align-items: center;
 }
 
 .aspectRatio {
-	width: 32rem;
-	height: 32rem;
-	display: flex;
 	justify-content: flex-start;
 	align-items: center;
 }
 
-/*
-┌────────────────┐
-│   Animations   │
-└────────────────┘
-*/
 
 #firstArrow {
 	animation: arrowsTransforming 1.8s infinite;
@@ -353,4 +496,4 @@ img {
 	.scaleControls {
 		gap: 0.5rem;
 	}
-}
+} */
