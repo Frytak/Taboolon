@@ -156,8 +156,8 @@ main {
 }
 
 .inputImage > label > svg {
-	width: 8rem;
-	height: 8rem;
+	width: calc(8rem * var(--scale));
+	height: calc(8rem * var(--scale));
 }
 
 .inputImageFooter,
