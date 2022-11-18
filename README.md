@@ -8,7 +8,7 @@ Website converting images to tables of various sizes that later can be inserted 
 
 Simply choose an image (jpg, png), select the compression of the table and click "Transform". The result will be shown on the right and you can copy it to your clipboard by clicking "Copy Table"!
 
-<img src="cat.png" style="border-radius:1rem;">
+<img src="./assets/cat.png" style="border-radius:1rem;">
 
 ## Compression?
 
