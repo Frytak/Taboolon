@@ -20,7 +20,7 @@
 	--roundedLg: 10px;
 
 	--scale: 1;
-	--tdScale: 0.2rem;
+	--fontSizeScale: 1;
 }
 
 * {
@@ -80,19 +80,19 @@ a {
 	flex-direction: column;
 	justify-content: center;
 	align-items: center;
-	font-size: calc(1.2rem * var(--scale));
+	font-size: calc(1.2rem * var(--fontSizeScale));
 	padding-top: 1rem;
 	padding-bottom: 1rem;
 }
 
 .info > p {
-	max-width: calc(86rem * var(--scale));
+	max-width: calc(96rem * var(--scale));
 	text-align: center;
 }
 
 h1 {
 	width: fit-content;
-	font-size: calc(5rem * var(--scale));
+	font-size: calc(5rem * var(--fontSizeScale));
 	background: linear-gradient(25deg, rgba(12, 127, 157, 1) 0%, rgba(122, 255, 235, 1) 100%);
 	background-clip: text;
 	-webkit-background-clip: text;
@@ -138,7 +138,7 @@ main {
 	gap: 1rem;
 	width: calc(32rem * var(--scale));
 	height: calc(32rem * var(--scale));
-	font-size: calc(1.6rem * var(--scale));
+	font-size: calc(1.6rem * var(--fontSizeScale));
 	border: 0.2rem dashed var(--primary);
 	border-radius: var(--roundedLg);
 	background-color: var(--depth1);
@@ -184,7 +184,7 @@ main {
 .inputImageFooter > div > button,
 .outputImageFooter > div > button {
 	padding: 0.4rem;
-	font-size: calc(1.4rem * var(--scale));
+	font-size: calc(1.4rem * var(--fontSizeScale));
 	background-color: var(--primary);
 	border-radius: var(--rounded);
 }
@@ -201,7 +201,7 @@ main {
 
 .inputImageInfo {
 	width: calc(32rem * var(--scale));
-	font-size: calc(1.4rem * var(--scale));
+	font-size: calc(1.4rem * var(--fontSizeScale));
 	display: flex;
 	flex-direction: column;
 	align-items: center;
@@ -236,7 +236,7 @@ main {
 
 #transform {
 	padding: 0.5rem;
-	font-size: calc(2rem * var(--scale));
+	font-size: calc(2rem * var(--fontSizeScale));
 	background: linear-gradient(15deg, rgba(12, 127, 157, 1) 40%, rgba(122, 255, 235, 1) 100%);
 	border-radius: var(--rounded);
 }
@@ -306,6 +306,7 @@ main {
 @media (max-width: 1599px) or (max-height: 999px) {
 	:root {
 		--scale: 0.9;
+		--fontSizeScale: 0.9;
 	}
 }
 
@@ -317,6 +318,7 @@ main {
 
 @media (max-width: 1299px) or (max-height: 749px) {
 	:root {
+		--fontSizeScale: 0.8;
 		--scale: 0.7;
 	}
 }
