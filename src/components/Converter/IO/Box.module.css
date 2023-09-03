@@ -1,0 +1,11 @@
+.box {
+    --size: 256px;
+
+    width: var(--size);
+    height: var(--size);
+
+    border-color: var(--border-color);
+    border-radius: var(--border-radius);
+    border-width: var(--border-width);
+    border-style: solid;
+}

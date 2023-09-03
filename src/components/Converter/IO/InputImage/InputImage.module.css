@@ -1,0 +1,20 @@
+.inputLabel {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.inputLabel:hover {
+    cursor: pointer;
+}
+
+.inputFile {
+    display: none;
+}
+
+.image {
+    max-width: 100%;
+    max-height: 100%;
+}

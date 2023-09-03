@@ -1,0 +1,15 @@
+.converter {
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+}
+
+.scaleDownTo {
+  width: 3.6rem;
+}
+
+.scaleOptions {
+  display: flex;
+  gap: 1rem;
+}
