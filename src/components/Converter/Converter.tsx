@@ -5,11 +5,10 @@ import Settings from "@/typescript/settings";
 import ConverterTS, { ConverterContext, ConverterDispatchContext, converterReducer } from "@/typescript/converter";
 import ScaleDownTo, { ScaleDownToProps } from "./ConverterOptions/Scale/ScaleDownTo/ScaleDownTo";
 import InputImage from "./IO/InputImage/InputImage";
-import ConversionOptions from "./ConverterOptions/ConversionOptions";
 import Scale from "./ConverterOptions/Scale/Scale";
 import OutputPreview from "./IO/OutputPreview/OutputPreview";
 import Loader from "./Loader/Loader";
-import { createContext } from "vm";
+import { renderToStaticMarkup } from "react-dom/server";
 
 interface ConverterProps {
   className?: string,
@@ -34,6 +33,7 @@ function Converter(props: ConverterProps) {
 
     function handleImageSubmition(file: File) { converterDispatch([{ SetInputFile: { file: file } }]) }
     function handleConvert() { converterDispatch([{ Convert: {} }]); }
+    function handleCopyTable() { navigator.clipboard.write([new ClipboardItem({ 'text/html': new Blob([renderToStaticMarkup(converter.getOutputTable())], { type: 'text/html' }) })]); }
 
     const renderScaleOptions = (howMany: number): ReactElement<ScaleDownToProps>[] => {
         let newScaleOptions: ReactElement<ScaleDownToProps>[] = [];
@@ -55,11 +55,12 @@ function Converter(props: ConverterProps) {
             </section>
           </ConverterDispatchContext.Provider>
         </ConverterContext.Provider>
-            <Loader />
-            <Button onClick={handleConvert}>
-              Convert!
-            </Button>
-            <OutputPreview canvasRef={canvas}/>
+        <Loader />
+        <Button onClick={handleConvert}>Convert!</Button>
+        <div>
+          <OutputPreview canvasRef={canvas}/>
+          <Button onClick={handleCopyTable}>Copy table</Button>
+        </div>
       </section>
     )
 }

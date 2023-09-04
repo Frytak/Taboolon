@@ -188,10 +188,9 @@ class ConverterTS {
         // Transform the scaled image to 2D array of `Pixel`s
         let imageAsPixels: Pixel[][] = Pixel.fromUint8ClampedArray(SCALED_IMAGE.data, WIDTH, HEIGHT);
 
-        // Copy to clipboard
-        // TODO: Make copying optional
-        let table = Pixel.toHTMLTable(imageAsPixels);
-        navigator.clipboard.write([new ClipboardItem({ 'text/html': new Blob([renderToStaticMarkup(table)], { type: 'text/html' }) })]);
+        // Set table
+        this.setOutputTable(Pixel.toHTMLTable(imageAsPixels));
+        // navigator.clipboard.write([new ClipboardItem({ 'text/html': new Blob([renderToStaticMarkup(table)], { type: 'text/html' }) })]);
     }
 }
 
