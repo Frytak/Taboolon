@@ -2,6 +2,7 @@ import style from "./Button.module.css";
 
 interface ButtonProps {
     className?: string,
+    disabled?: boolean,
     onClick?: () => void,
 
     children?: any,
@@ -9,7 +10,7 @@ interface ButtonProps {
 
 function Button(props: ButtonProps) {
     return (
-        <button className={[style.button, props.className].join(' ')} onClick={props.onClick}>
+        <button className={[style.button, props.className].join(' ')} disabled={props.disabled} onClick={props.onClick}>
             {props.children}
         </button>
     )

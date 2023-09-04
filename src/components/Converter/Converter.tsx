@@ -23,17 +23,21 @@ function Converter(props: ConverterProps) {
 
     const [inputImage, setInputImage] = useState<HTMLImageElement | undefined>(undefined);
     useEffect(() => {
-      converter.getInputImageURL().then((imageURL) => {
-        if (imageURL !== undefined && imageURL.length !== 0 && converter.getInputImage()?.src.length === 0) {
+      converter.getImageURL().then((imageURL) => {
+        if (imageURL !== undefined && imageURL.length !== 0 && converter.getImage()?.src.length === 0) {
           converterDispatch([{ SetInputImageURL: { URL: imageURL } }]);
         }
-        setInputImage(converter.getInputImage());
+        setInputImage(converter.getImage());
       });
     }, [converter])
 
     function handleImageSubmition(file: File) { converterDispatch([{ SetInputFile: { file: file } }]) }
     function handleConvert() { converterDispatch([{ Convert: {} }]); }
-    function handleCopyTable() { navigator.clipboard.write([new ClipboardItem({ 'text/html': new Blob([renderToStaticMarkup(converter.getOutputTable())], { type: 'text/html' }) })]); }
+    function handleCopyTable() {
+      const TABLE = converter.getTable();
+      if (TABLE === undefined) { return; }
+      navigator.clipboard.write([new ClipboardItem({ 'text/html': new Blob([renderToStaticMarkup(TABLE)], { type: 'text/html' }) })]);
+    }
 
     const renderScaleOptions = (howMany: number): ReactElement<ScaleDownToProps>[] => {
         let newScaleOptions: ReactElement<ScaleDownToProps>[] = [];
@@ -47,20 +51,24 @@ function Converter(props: ConverterProps) {
 
     return (
       <section className={[style.converter, props.className].join(' ')}>
-        <ConverterContext.Provider value={converter}>
-          <ConverterDispatchContext.Provider value={converterDispatch}>
-            <section className={style.input}>
+
+        <div className={style.input}>
+          <ConverterContext.Provider value={converter}>
+            <ConverterDispatchContext.Provider value={converterDispatch}>
               <InputImage image={inputImage} onImageSubmit={handleImageSubmition} />
               <Scale className={style.scaleOptions}>{renderScaleOptions(6)}</Scale>
-            </section>
-          </ConverterDispatchContext.Provider>
-        </ConverterContext.Provider>
+            </ConverterDispatchContext.Provider>
+          </ConverterContext.Provider>
+        </div>
+
         <Loader />
         <Button onClick={handleConvert}>Convert!</Button>
-        <div>
+        
+        <div className={style.output}>
           <OutputPreview canvasRef={canvas}/>
           <Button onClick={handleCopyTable}>Copy table</Button>
         </div>
+
       </section>
     )
 }

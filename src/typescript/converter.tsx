@@ -1,147 +1,142 @@
-import { Dispatch, MutableRefObject, ReactNode, createContext, useContext } from "react";
+import { Dispatch, MutableRefObject, ReactElement, TableHTMLAttributes, createContext, useContext } from "react";
 import Settings from "./settings";
-import React from "react";
-import { renderToStaticMarkup } from "react-dom/server";
-
-const PIXEL_VAL_LOWER_BOUND = 0;
-const PIXEL_VAL_HIGHER_BOUND = 255;
-
-class Pixel {
-    private r!: number;
-    private g!: number;
-    private b!: number;
-    private a!: number;
-
-    constructor(r: number = 0, g: number = 0, b: number = 0, a: number = 0, unckecked: boolean = false) {
-        this.setR(r, unckecked);
-        this.setG(g, unckecked);
-        this.setB(b, unckecked);
-        this.setA(a, unckecked);
-    }
-
-    getR(): number { return this.r; }
-    getG(): number { return this.g; }
-    getB(): number { return this.b; }
-    getA(): number { return this.a; }
-
-    setR(r: number, unckecked: boolean = false) {
-        if (unckecked) {
-            this.r = r;
-        } else {
-            this.r = Math.floor(r);
-            if (r < PIXEL_VAL_LOWER_BOUND) { this.r = 0; }
-            if (r > PIXEL_VAL_HIGHER_BOUND) { this.r = 255; }
-        }
-    }
-
-    setG(g: number, unckecked: boolean = false) {
-        if (unckecked) {
-            this.g = g;
-        } else {
-            this.g = Math.floor(g);
-            if (g < PIXEL_VAL_LOWER_BOUND) { this.g = 0; }
-            if (g > PIXEL_VAL_HIGHER_BOUND) { this.g = 255; }
-        }
-    }
-
-    setB(b: number, unckecked: boolean = false) {
-        if (unckecked) {
-            this.b = b;
-        } else {
-            this.b = Math.floor(b);
-            if (b < PIXEL_VAL_LOWER_BOUND) { this.b = 0; }
-            if (b > PIXEL_VAL_HIGHER_BOUND) { this.b = 255; }
-        }
-    }
-
-    setA(a: number, unckecked: boolean = false) {
-        if (unckecked) {
-            this.a = a;
-        } else {
-            this.a = Math.floor(a);
-            if (a < PIXEL_VAL_LOWER_BOUND) { this.a = 0; }
-            if (a > PIXEL_VAL_HIGHER_BOUND) { this.a = 255; }
-        }
-    }
-
-    static fromUint8ClampedArray(data: Uint8ClampedArray, width: number, height: number): Pixel[][] {
-        const SPACING = 4;
-        let pixels2DArray: Pixel[][] = [];
-
-        for (let y = 0; y < (width * height * SPACING); y += width * SPACING) {
-            pixels2DArray.push([]);
-            let arrRow = y / (width * SPACING);
-
-            for (let x = 0; x < width * SPACING; x += SPACING) {
-                pixels2DArray[arrRow].push(new Pixel(
-                    data[y + x + 0],
-                    data[y + x + 1],
-                    data[y + x + 2],
-                    data[y + x + 3],
-                    true
-                ));
-            }
-        }
-
-        return pixels2DArray;
-    }
-
-    static toHTMLTable(data: Pixel[][]) {
-        const WIDTH = data[0].length;
-        const HEIGHT = data.length;
-
-        let rows: ReactNode[] = [];
-        for (let y = 0; y < HEIGHT; y++) {
-            let row: ReactNode[] = [];
-            for (let x = 0; x < WIDTH; x++) {
-                row.push(<td key={y*x} style={{backgroundColor: `rgba(${data[y][x].getR()}, ${data[y][x].getG()}, ${data[y][x].getB()}, ${data[y][x].getA()})`}} ></td>)
-            }
-            rows.push(<tr key={y}>{row}</tr>);
-        }
-
-        return (<table>{rows}</table>);
-    }
-}
+import Pixel from "./pixel";
 
 class ConverterTS {
-    readonly settings: Settings;
-    canvas: MutableRefObject<HTMLCanvasElement | undefined>;
+    readonly canvas: MutableRefObject<HTMLCanvasElement | undefined>;
+    private settings: Settings;
     readonly reader: FileReader;
 
-    private inputFile?: File;
-    private inputImage?: HTMLImageElement;
-    private outputTable: HTMLTableElement;
+    private file?: File;
+    private image?: HTMLImageElement;
+    private table?: ReactElement<TableHTMLAttributes<any>>;
 
 
-    constructor(settings: Settings, canvas: MutableRefObject<HTMLCanvasElement | undefined>, reader?: FileReader, inputFile?: File, inputImage?: HTMLImageElement, outputTable?: any) {
+    constructor(settings: Settings, canvas: MutableRefObject<HTMLCanvasElement | undefined>, reader?: FileReader, inputFile?: File, inputImage?: HTMLImageElement, outputTable?: ReactElement<TableHTMLAttributes<any>>) {
         this.settings = settings;
         this.canvas = canvas;
         this.reader = (reader ?? new FileReader);
-        this.inputFile = inputFile;
-        this.inputImage = inputImage;
-        this.outputTable = (outputTable ?? "Output test");
+        this.file = inputFile;
+        this.image = inputImage;
+        this.table = outputTable;
     }
 
-    getInputFile(): File | undefined { return this.inputFile; }
-    setInputFile(image: File) {
-        this.inputImage = new Image();
-        this.inputFile = image; 
+    // Settings
+    getSettingsCopy(): Settings {
+        return new Settings(
+            this.getScaleDownMultiplier(),
+            this.getTablePixelLimit()
+        );
     }
 
-    /**
-     * WARNING!
-     * Remember to do `setInputImage` with the `converterDispatch` for the current image.
-     */
-    getInputImage(): HTMLImageElement | undefined { return this.inputImage; }
+    getScaleDownMultiplier(): number { return this.settings.getScaleDownMultiplier(); }
 
-    getInputImageURL(): Promise<string | undefined> {
+    isScaleDownMultiplierApropariate(scaleDownMultiplier: number): boolean {
+        const SCALED_IMAGE_PIXEL_TOTAL = this.getScaledImagePixelTotalBy(scaleDownMultiplier);
+
+        if (SCALED_IMAGE_PIXEL_TOTAL === undefined) { return true; }
+        if (SCALED_IMAGE_PIXEL_TOTAL > this.getTablePixelLimit()) { return false; }
+
+        return true;
+    }
+
+    setScaleDownMultiplier(scaleDownMultiplier: number) {
+        if (!this.isScaleDownMultiplierApropariate(scaleDownMultiplier)) { return; }
+        this.settings.setScaleDownMultiplier(scaleDownMultiplier);
+    }
+
+    getTablePixelLimit(): number {
+        return this.settings.getTablePixelLimit();
+    }
+
+    setTablePixelLimit(outputTablePixelLimit: number) {
+        this.settings.setTablePixelLimit(outputTablePixelLimit);
+    }
+
+    // Input file
+    getFile(): File | undefined { return this.file; }
+    setFile(image: File) {
+        this.image = new Image();
+        this.file = image; 
+    }
+
+    // Input Image
+    getImage(): HTMLImageElement | undefined {
+        // if (this.image === undefined) { throw Error("No input image from file. Remember to call dispatch function `SetInputImageURL` before using this function."); }
+        return this.image;
+    }
+
+    getImagePixelWidth(): number | undefined {
+        return this.getImage()?.width;
+    }
+
+    getImagePixelHeight(): number | undefined {
+        return this.getImage()?.height;
+    }
+
+    getImagePixelTotal(): number | undefined {
+        const WIDTH = this.getImagePixelWidth();
+        const HEIGHT = this.getImagePixelHeight();
+
+        if (WIDTH === undefined) { return undefined; }
+        if (HEIGHT === undefined) { return undefined; }
+
+        return WIDTH * HEIGHT;
+    }
+
+    getScaledImagePixelWidthBy(scaleDownMultiplier: number): number | undefined {
+        let WIDTH = this.getImagePixelWidth();
+        if (WIDTH === undefined) { return undefined; }
+
+        return Math.floor(WIDTH / scaleDownMultiplier);
+    }
+
+    getScaledImagePixelHeightBy(scaleDownMultiplier: number): number | undefined {
+        let HEIGHT = this.getImagePixelHeight();
+        if (HEIGHT === undefined) { return undefined; }
+
+        return Math.floor(HEIGHT / scaleDownMultiplier);
+    }
+    
+    getScaledImagePixelTotalBy(scaleDownMultiplier: number): number | undefined {
+        const SCALED_WIDTH = this.getScaledImagePixelWidthBy(scaleDownMultiplier);
+        const SCALED_HEIGHT = this.getScaledImagePixelHeightBy(scaleDownMultiplier);
+
+        if (SCALED_WIDTH === undefined) { return undefined; }
+        if (SCALED_HEIGHT === undefined) { return undefined; }
+
+        return SCALED_WIDTH * SCALED_HEIGHT;
+    }
+
+    getScaledImagePixelWidth(): number | undefined {
+        let SCALE_DOWN_MULTIPLIER = this.getScaleDownMultiplier();
+        if (SCALE_DOWN_MULTIPLIER === undefined) { return undefined; }
+
+        return this.getScaledImagePixelWidthBy(SCALE_DOWN_MULTIPLIER);
+    }
+
+    getScaledImagePixelHeight(): number | undefined {
+        let SCALE_DOWN_MULTIPLIER = this.getScaleDownMultiplier();
+        if (SCALE_DOWN_MULTIPLIER === undefined) { return undefined; }
+
+        return this.getScaledImagePixelHeightBy(SCALE_DOWN_MULTIPLIER);
+    }
+    
+    getScaledImagePixelTotal(): number | undefined {
+        let SCALE_DOWN_MULTIPLIER = this.getScaleDownMultiplier();
+        if (SCALE_DOWN_MULTIPLIER === undefined) { return undefined; }
+
+        return this.getScaledImagePixelTotalBy(SCALE_DOWN_MULTIPLIER);
+    }
+
+    getImageURL(): Promise<string | undefined> {
         return new Promise((resolve, reject) => {
-            if (this.inputFile === undefined) { 
+            if (this.file === undefined) { 
                 resolve(undefined);
             }
 
-            if (this.inputImage !== undefined && this.inputImage.src.length !== 0) {
-                resolve(this.inputImage.src);
+            if (this.image !== undefined && this.image.src.length !== 0) {
+                resolve(this.image.src);
             }
 
             this.reader.onload = () => {
@@ -151,25 +146,24 @@ class ConverterTS {
                 resolve(this.reader.result);
             }
 
-            this.reader.readAsDataURL(this.inputFile!);
+            this.reader.readAsDataURL(this.file!);
         });
     }
-    setInputImageURL(URL: string | undefined) {
-        if (this.inputImage === undefined) { this.inputImage = new Image(); }
-        this.inputImage.src = (URL ?? "");
+    setImageURL(URL: string | undefined) {
+        if (this.image === undefined) { this.image = new Image(); }
+        this.image.src = (URL ?? "");
     }
 
-    getOutputTable(): any { return this.outputTable; }
-    setOutputTable(table: any) { this.outputTable = table; }
+    // Output table
+    getTable(): ReactElement<TableHTMLAttributes<any>> | undefined { return this.table; }
+    setTable(table: ReactElement<TableHTMLAttributes<any>>) { this.table = table; }
 
     convert() {
-        if (this.inputImage === undefined) { throw Error("No input image found."); }
+        if (this.image === undefined) { throw Error("No input image found."); }
         if (this.canvas.current === undefined) { throw Error("No canvas found."); }
 
-        const WIDTH = Math.floor(this.inputImage.width / this.settings.getScaleDownMultiplier());
-        const HEIGHT = Math.floor(this.inputImage.height / this.settings.getScaleDownMultiplier());
-
-        console.log(this.settings);
+        const WIDTH = Math.floor(this.image.width / this.settings.getScaleDownMultiplier());
+        const HEIGHT = Math.floor(this.image.height / this.settings.getScaleDownMultiplier());
 
         // Set canvas size
         this.canvas.current.width = WIDTH;
@@ -180,7 +174,7 @@ class ConverterTS {
         if (CANVAS_CONTEXT === null) { throw Error("No canvas found."); }
         
         // Draw image to canvas
-        CANVAS_CONTEXT.drawImage(this.inputImage, 0, 0, WIDTH, HEIGHT);
+        CANVAS_CONTEXT.drawImage(this.image, 0, 0, WIDTH, HEIGHT);
 
         // Get scaled image
         const SCALED_IMAGE = CANVAS_CONTEXT.getImageData(0, 0, WIDTH, HEIGHT);
@@ -189,8 +183,7 @@ class ConverterTS {
         let imageAsPixels: Pixel[][] = Pixel.fromUint8ClampedArray(SCALED_IMAGE.data, WIDTH, HEIGHT);
 
         // Set table
-        this.setOutputTable(Pixel.toHTMLTable(imageAsPixels));
-        // navigator.clipboard.write([new ClipboardItem({ 'text/html': new Blob([renderToStaticMarkup(table)], { type: 'text/html' }) })]);
+        this.setTable(Pixel.toHTMLTable(imageAsPixels));
     }
 }
 
@@ -209,12 +202,12 @@ interface ConverterDispatchAction {
  */
 function converterReducer(state: ConverterTS, actions: ConverterDispatchAction[]) {
     let newState = new ConverterTS(
-        state.settings,
+        state.getSettingsCopy(),
         state.canvas,
         state.reader,
-        state.getInputFile(),
-        state.getInputImage(),
-        state.getOutputTable(),
+        state.getFile(),
+        state.getImage(),
+        state.getTable(),
     );
 
     actions.forEach((action) => {
@@ -222,17 +215,17 @@ function converterReducer(state: ConverterTS, actions: ConverterDispatchAction[]
 
         switch (true) {
             case (action.SetScaleDownMultiplier !== undefined): {
-                newState.settings.setScaleDownMultiplier(action.SetScaleDownMultiplier!.multiplier);
+                newState.setScaleDownMultiplier(action.SetScaleDownMultiplier!.multiplier);
                 break;
             }
 
             case (action.SetInputFile !== undefined): {
-                newState.setInputFile(action.SetInputFile!.file);
+                newState.setFile(action.SetInputFile!.file);
                 break;
             }
 
             case (action.SetInputImageURL !== undefined): {
-                newState.setInputImageURL(action.SetInputImageURL!.URL);
+                newState.setImageURL(action.SetInputImageURL!.URL);
                 break;
             }
 

@@ -10,9 +10,9 @@ interface ConversionOptionsProps {
 
 function ConversionOptions(props: ConversionOptionsProps) {
     return (
-        <section>
+        <div>
             {props.children}
-        </section>
+        </div>
     )
 }
 

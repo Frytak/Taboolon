@@ -18,24 +18,34 @@ function Scale(props: ScaleProps) {
         let newChildren: ReactElement<ScaleDownToProps>[] = [];
 
         props.children.forEach((element) => {
-            if (element.props.scaleTo === converter.settings.getScaleDownMultiplier()) {
+            // When element is active
+            if (element.props.scaleTo === converter.getScaleDownMultiplier()) {
                 let elementCopy = React.cloneElement(element, {
-                    className: [element.props.className, optionsStyle.selected].join(' ')
+                    className: [element.props.className, optionsStyle.selected].join(' '),
                 });
                 newChildren.push(elementCopy);
             } else {
-                newChildren.push(element);
+                // When element is disabled
+                const SHOULD_DISABLE = !converter.isScaleDownMultiplierApropariate(element.props.scaleTo);
+                if (SHOULD_DISABLE) {
+                    let elementCopy = React.cloneElement(element, {
+                        className: [element.props.className].join(' '),
+                        disabled: true
+                    });
+                    newChildren.push(elementCopy);
+                } else {
+                    newChildren.push(element);
+                }
             }
         });
 
         return newChildren;
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [props.children])
+    }, [props.children, converter])
 
     return (
-        <section className={props.className}>
+        <div className={props.className}>
             {memoChildren}
-        </section>
+        </div>
     )
 }
 

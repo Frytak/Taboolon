@@ -1,3 +1,7 @@
 .selected {
     background-color: var(--secondary-color);
 }
+
+.selected:active {
+    background-color: var(--secondary-active-color);
+}

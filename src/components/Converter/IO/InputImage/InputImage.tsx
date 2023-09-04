@@ -24,12 +24,12 @@ function InputImage(props: InputImageProps) {
     }, [props.image])
 
     return (
-        <section className={[box_style.box, style.inputImage, props.className].join(' ')}>
+        <div className={[box_style.box, style.inputImage, props.className].join(' ')}>
             <label htmlFor="inputImage" className={style.inputLabel}>
                 {memoRenderImage}
             </label>
             <input id="inputImage" className={style.inputFile} type="file" accept="image/*" onChange={handleFileSumbition}/>
-        </section>
+        </div>
     )
 }
 

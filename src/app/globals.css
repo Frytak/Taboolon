@@ -2,11 +2,15 @@
   --primary-background-color: rgb(34, 34, 34);
   --secondary-background-color: rgb(26, 26, 26);
   --tertiary-background-color: rgb(20, 20, 20);
+  
+  --primary-color: rgb(24, 122, 172);
+  --primary-active-color: rgb(20, 105, 148);
 
+  --secondary-color: rgb(6, 70, 112);
+  --secondary-active-color: rgb(4, 61, 99);
 
-  --primary-color: rgb(100, 185, 228);
-  --secondary-color: rgb(0, 58, 97);
-  --accent-color: rgb(75, 188, 169);
+  --accent-color: rgb(21, 160, 165);
+  --accent-active-color: rgb(17, 147, 151);
 
   --font-color: rgb(255, 255, 255);
 

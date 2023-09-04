@@ -8,9 +8,9 @@ interface OutputPreviewProps {
 
 function OutputPreview(props: OutputPreviewProps) {
     return (
-        <section className={[box_style.box, style.outputPreview].join(' ')}>
+        <div className={[box_style.box, style.outputPreview].join(' ')}>
             <canvas ref={props.canvasRef} className={style.canvas}></canvas>
-        </section>
+        </div>
     )
 }
 
