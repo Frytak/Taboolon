@@ -1,15 +1,37 @@
+const DEFAULT_POSSIBLE_SCALE_DOWN_MULTIPLIERS = [1, 2, 4, 8, 16, 32];
+
 class Settings {
-    private scaleDownMultiplier: number;
+    private possibleScaleDownMultipliers: number[];
+    private customScaleDownMultiplier: boolean;
+    private currentScaleDownMultiplier: number;
     private tablePixelLimit: number;
 
-    constructor(scaleDownMultiplier?: number, outputTablePixelLimit?: number) {
-        this.scaleDownMultiplier = (scaleDownMultiplier ?? 1);
+    constructor(possibleScaleDownMiltipliers?: number[], customScaleDownMultiplier?: boolean, scaleDownMultiplier?: number, outputTablePixelLimit?: number) {
+        this.possibleScaleDownMultipliers = (possibleScaleDownMiltipliers ?? DEFAULT_POSSIBLE_SCALE_DOWN_MULTIPLIERS);
+        this.customScaleDownMultiplier = (customScaleDownMultiplier ?? false);
+        this.currentScaleDownMultiplier = (scaleDownMultiplier ?? 1);
         this.tablePixelLimit = (outputTablePixelLimit ?? 40_000);
     }
 
-    getScaleDownMultiplier(): number { return this.scaleDownMultiplier; }
-    setScaleDownMultiplier(scaleDownMultiplier: number) {
-        this.scaleDownMultiplier = scaleDownMultiplier;
+    getPossibleScaleDownMultipliers(): number[] {
+        return [...this.possibleScaleDownMultipliers];
+    }
+
+    setPossibleScaleDownMultipliers(possibleScaleDownMiltipliers?: number[]) {
+        this.possibleScaleDownMultipliers = (possibleScaleDownMiltipliers ?? DEFAULT_POSSIBLE_SCALE_DOWN_MULTIPLIERS);
+    }
+
+    getCustomScaleDownMultiplier(): boolean {
+        return this.customScaleDownMultiplier;
+    }
+
+    setCustomScaleDownMultiplier(customScaleDownMultiplier: boolean) {
+        this.customScaleDownMultiplier = customScaleDownMultiplier;
+    }
+
+    getCurrentScaleDownMultiplier(): number { return this.currentScaleDownMultiplier; }
+    setCurrentScaleDownMultiplier(scaleDownMultiplier: number) {
+        this.currentScaleDownMultiplier = scaleDownMultiplier;
     }
 
     getTablePixelLimit(): number { return this.tablePixelLimit; }

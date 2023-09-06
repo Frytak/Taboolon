@@ -1,5 +1,5 @@
 import ConverterTS, { ConverterDispatchAction } from "@/typescript/converter";
-import { Dispatch, memo, useState } from "react";
+import { Dispatch, memo } from "react";
 
 interface ConversionOptionsProps {
     settings: ConverterTS,

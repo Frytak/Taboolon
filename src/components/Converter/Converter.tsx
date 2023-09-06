@@ -1,5 +1,5 @@
 import style from "./Converter.module.css";
-import { ReactElement, memo, useEffect, useReducer, useRef, useState } from "react";
+import { ReactElement, memo, useEffect, useMemo, useReducer, useRef, useState } from "react";
 import Button from "../Standard/Button/Button";
 import Settings from "@/typescript/settings";
 import ConverterTS, { ConverterContext, ConverterDispatchContext, converterReducer } from "@/typescript/converter";
@@ -18,14 +18,20 @@ function Converter(props: ConverterProps) {
     const canvas = useRef<HTMLCanvasElement | undefined>(undefined);
     const [converter, converterDispatch] = useReducer(
       converterReducer,
-      new ConverterTS(new Settings(32), canvas)
+      new ConverterTS(new Settings(undefined, false, 32), canvas)
     )
 
     const [inputImage, setInputImage] = useState<HTMLImageElement | undefined>(undefined);
     useEffect(() => {
       converter.getImageURL().then((imageURL) => {
-        if (imageURL !== undefined && imageURL.length !== 0 && converter.getImage()?.src.length === 0) {
-          converterDispatch([{ SetInputImageURL: { URL: imageURL } }]);
+        if (imageURL !== undefined && imageURL.length !== 0 && converter.getImage() === undefined) {
+          converterDispatch([{ SetInputImageURL: { URL: imageURL, then: ((converter) => {
+            if (!converter.isScaleDownMultiplierApropariate()) {
+              converterDispatch([{ SetScaleDownMultiplier: { multiplier: converter.highestApropariateScaleDownMultiplier() ?? converter.getPossibleScaleDownMultipliers()[-1] } }])
+            } else {
+              converterDispatch([{ ImageURLSet: {} }])
+            }
+          }) } }]);
         }
         setInputImage(converter.getImage());
       });
@@ -39,15 +45,15 @@ function Converter(props: ConverterProps) {
       navigator.clipboard.write([new ClipboardItem({ 'text/html': new Blob([renderToStaticMarkup(TABLE)], { type: 'text/html' }) })]);
     }
 
-    const renderScaleOptions = (howMany: number): ReactElement<ScaleDownToProps>[] => {
+    let memoScaleOptions = useMemo((): ReactElement<ScaleDownToProps>[] => {
         let newScaleOptions: ReactElement<ScaleDownToProps>[] = [];
 
-        for (let i = 0; i < howMany; i++) {
-            newScaleOptions.push( <ScaleDownTo key={i} className={style.scaleDownTo} scaleTo={2**i} /> )
-        }
+        converter.getPossibleScaleDownMultipliers().forEach((scale, index) => {
+          newScaleOptions.push( <ScaleDownTo key={index} className={style.scaleDownTo} scaleTo={scale} /> )
+        })
 
         return newScaleOptions;
-    }
+    }, [converter])
 
     return (
       <section className={[style.converter, props.className].join(' ')}>
@@ -56,7 +62,7 @@ function Converter(props: ConverterProps) {
           <ConverterContext.Provider value={converter}>
             <ConverterDispatchContext.Provider value={converterDispatch}>
               <InputImage image={inputImage} onImageSubmit={handleImageSubmition} />
-              <Scale className={style.scaleOptions}>{renderScaleOptions(6)}</Scale>
+              <Scale className={style.scaleOptions}>{memoScaleOptions}</Scale>
             </ConverterDispatchContext.Provider>
           </ConverterContext.Provider>
         </div>

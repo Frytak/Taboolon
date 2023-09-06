@@ -15,5 +15,5 @@
 }
 
 .button:disabled {
-    filter: brightness(60%);
+    filter: brightness(60%) grayscale(100%);
 }

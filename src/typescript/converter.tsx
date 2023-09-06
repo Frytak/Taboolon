@@ -24,15 +24,30 @@ class ConverterTS {
     // Settings
     getSettingsCopy(): Settings {
         return new Settings(
+            this.getPossibleScaleDownMultipliers(),
+            this.getCustomScaleDownMultiplier(),
             this.getScaleDownMultiplier(),
             this.getTablePixelLimit()
         );
     }
 
-    getScaleDownMultiplier(): number { return this.settings.getScaleDownMultiplier(); }
+    getScaleDownMultiplier(): number { return this.settings.getCurrentScaleDownMultiplier(); }
+    getPossibleScaleDownMultipliers(): number[] { return [...this.settings.getPossibleScaleDownMultipliers()]; }
+    getCustomScaleDownMultiplier(): boolean { return this.settings.getCustomScaleDownMultiplier(); }
 
-    isScaleDownMultiplierApropariate(scaleDownMultiplier: number): boolean {
-        const SCALED_IMAGE_PIXEL_TOTAL = this.getScaledImagePixelTotalBy(scaleDownMultiplier);
+    highestApropariateScaleDownMultiplier(): number | undefined {
+        const POSSIBLE_SCALE_DOWN_MULTIPLIERS = this.getPossibleScaleDownMultipliers(); 
+        for (let i = 0; i < POSSIBLE_SCALE_DOWN_MULTIPLIERS.length; i++) {
+            if (this.isScaleDownMultiplierApropariate(POSSIBLE_SCALE_DOWN_MULTIPLIERS[i])) {
+                return POSSIBLE_SCALE_DOWN_MULTIPLIERS[i];
+            }
+        };
+        return;
+    }
+
+    isScaleDownMultiplierApropariate(scaleDownMultiplier?: number): boolean {
+        const SCALED_IMAGE_PIXEL_TOTAL = this.getScaledImagePixelTotalBy(scaleDownMultiplier ?? this.getScaleDownMultiplier());
+        
 
         if (SCALED_IMAGE_PIXEL_TOTAL === undefined) { return true; }
         if (SCALED_IMAGE_PIXEL_TOTAL > this.getTablePixelLimit()) { return false; }
@@ -40,9 +55,9 @@ class ConverterTS {
         return true;
     }
 
-    setScaleDownMultiplier(scaleDownMultiplier: number) {
+    setScaleDownMultiplier(scaleDownMultiplier: number) { 
         if (!this.isScaleDownMultiplierApropariate(scaleDownMultiplier)) { return; }
-        this.settings.setScaleDownMultiplier(scaleDownMultiplier);
+        this.settings.setCurrentScaleDownMultiplier(scaleDownMultiplier);
     }
 
     getTablePixelLimit(): number {
@@ -55,9 +70,9 @@ class ConverterTS {
 
     // Input file
     getFile(): File | undefined { return this.file; }
-    setFile(image: File) {
-        this.image = new Image();
-        this.file = image; 
+    setFile(file: File) {
+        this.image = undefined;
+        this.file = file; 
     }
 
     // Input Image
@@ -149,9 +164,15 @@ class ConverterTS {
             this.reader.readAsDataURL(this.file!);
         });
     }
-    setImageURL(URL: string | undefined) {
-        if (this.image === undefined) { this.image = new Image(); }
-        this.image.src = (URL ?? "");
+
+    setImageURL(URL: string | undefined): Promise<boolean> {
+        return new Promise((resolve, reject) => {
+            if (this.image === undefined) { this.image = new Image(); }
+            this.image.onload = () => {
+                resolve(true);
+            }
+            this.image.src = (URL ?? "");
+        });
     }
 
     // Output table
@@ -162,8 +183,8 @@ class ConverterTS {
         if (this.image === undefined) { throw Error("No input image found."); }
         if (this.canvas.current === undefined) { throw Error("No canvas found."); }
 
-        const WIDTH = Math.floor(this.image.width / this.settings.getScaleDownMultiplier());
-        const HEIGHT = Math.floor(this.image.height / this.settings.getScaleDownMultiplier());
+        const WIDTH = Math.floor(this.image.width / this.settings.getCurrentScaleDownMultiplier());
+        const HEIGHT = Math.floor(this.image.height / this.settings.getCurrentScaleDownMultiplier());
 
         // Set canvas size
         this.canvas.current.width = WIDTH;
@@ -190,7 +211,8 @@ class ConverterTS {
 interface ConverterDispatchAction {
     SetScaleDownMultiplier?: { multiplier: number },
     SetInputFile?: { file: File },
-    SetInputImageURL?: { URL: string | undefined },
+    SetInputImageURL?: { URL: string | undefined, then?: (converter: ConverterTS) => void },
+    ImageURLSet?: { },
     Convert?: { },
 }
 
@@ -225,7 +247,13 @@ function converterReducer(state: ConverterTS, actions: ConverterDispatchAction[]
             }
 
             case (action.SetInputImageURL !== undefined): {
-                newState.setImageURL(action.SetInputImageURL!.URL);
+                newState.setImageURL(action.SetInputImageURL!.URL).then(() => {
+                    action.SetInputImageURL!.then?.(newState);
+                });
+                break;
+            }
+
+            case (action.ImageURLSet !== undefined): {
                 break;
             }
 
@@ -233,9 +261,11 @@ function converterReducer(state: ConverterTS, actions: ConverterDispatchAction[]
                 newState.convert();
                 break;
             }
+
+            default: { throw Error("Unknown converter dispatch action."); }
         }
     })
-
+    
     return newState;
 }
 
