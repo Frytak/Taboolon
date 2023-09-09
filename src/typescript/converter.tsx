@@ -1,38 +1,37 @@
+import { UseState, UseStrucer, asUseStrucer, setUseStrucerDefault } from "./useStrucer";
 import { Dispatch, MutableRefObject, ReactElement, TableHTMLAttributes, createContext, useContext } from "react";
 import Settings from "./settings";
 import Pixel from "./pixel";
 
 class ConverterTS {
-    readonly canvas: MutableRefObject<HTMLCanvasElement | undefined>;
-    private settings: Settings;
-    readonly reader: FileReader;
+    readonly settings: Settings;
 
-    private file?: File;
-    private image?: HTMLImageElement;
+    readonly canvas: MutableRefObject<HTMLCanvasElement | undefined>;
+    private reader: FileReader;
+
+    private file: UseStrucer<File | undefined>;
+    private image: UseStrucer<HTMLImageElement | undefined>;
     private table?: ReactElement<TableHTMLAttributes<any>>;
 
 
-    constructor(settings: Settings, canvas: MutableRefObject<HTMLCanvasElement | undefined>, reader?: FileReader, inputFile?: File, inputImage?: HTMLImageElement, outputTable?: ReactElement<TableHTMLAttributes<any>>) {
+    constructor(
+        settings: Settings,
+        canvas: MutableRefObject<HTMLCanvasElement | undefined>,
+        inputFile: UseState<File | undefined>,
+        inputImage: UseState<HTMLImageElement | undefined>,
+    ) {
+        this.reader = new FileReader;
+
         this.settings = settings;
         this.canvas = canvas;
-        this.reader = (reader ?? new FileReader);
-        this.file = inputFile;
-        this.image = inputImage;
-        this.table = outputTable;
-    }
+        this.file = asUseStrucer(inputFile);
+        this.image = asUseStrucer(inputImage);
 
-    // Settings
-    getSettingsCopy(): Settings {
-        return new Settings(
-            this.getPossibleScaleDownMultipliers(),
-            this.getCustomScaleDownMultiplier(),
-            this.getScaleDownMultiplier(),
-            this.getTablePixelLimit()
-        );
+        console.log(this);
     }
 
     getScaleDownMultiplier(): number { return this.settings.getCurrentScaleDownMultiplier(); }
-    getPossibleScaleDownMultipliers(): number[] { return [...this.settings.getPossibleScaleDownMultipliers()]; }
+    getPossibleScaleDownMultipliers(): number[] { return this.settings.getPossibleScaleDownMultipliers(); }
     getCustomScaleDownMultiplier(): boolean { return this.settings.getCustomScaleDownMultiplier(); }
 
     highestApropariateScaleDownMultiplier(): number | undefined {
@@ -69,16 +68,19 @@ class ConverterTS {
     }
 
     // Input file
-    getFile(): File | undefined { return this.file; }
+    getFile(): File | undefined { return this.file.value; }
     setFile(file: File) {
-        this.image = undefined;
-        this.file = file; 
+        this.image.set(undefined);
+        this.file.set(file); 
     }
 
     // Input Image
     getImage(): HTMLImageElement | undefined {
-        // if (this.image === undefined) { throw Error("No input image from file. Remember to call dispatch function `SetInputImageURL` before using this function."); }
-        return this.image;
+        return this.image.value;
+    }
+
+    setImage(image: HTMLImageElement | undefined) {
+        this.image.set(image);
     }
 
     getImagePixelWidth(): number | undefined {
@@ -146,12 +148,15 @@ class ConverterTS {
 
     getImageURL(): Promise<string | undefined> {
         return new Promise((resolve, reject) => {
-            if (this.file === undefined) { 
+            const FILE = this.getFile();
+            const IMAGE = this.getImage();
+
+            if (FILE === undefined) { 
                 resolve(undefined);
             }
 
-            if (this.image !== undefined && this.image.src.length !== 0) {
-                resolve(this.image.src);
+            if (IMAGE !== undefined && IMAGE.src.length !== 0) {
+                resolve(IMAGE.src);
             }
 
             this.reader.onload = () => {
@@ -161,17 +166,22 @@ class ConverterTS {
                 resolve(this.reader.result);
             }
 
-            this.reader.readAsDataURL(this.file!);
+            this.reader.readAsDataURL(FILE!);
         });
     }
 
     setImageURL(URL: string | undefined): Promise<boolean> {
         return new Promise((resolve, reject) => {
-            if (this.image === undefined) { this.image = new Image(); }
-            this.image.onload = () => {
+            const IMAGE = this.getImage();
+            let newImage = new Image();
+            if (IMAGE !== undefined) { newImage = IMAGE; }
+
+            newImage.onload = () => {
+                this.setImage(newImage);
                 resolve(true);
             }
-            this.image.src = (URL ?? "");
+
+            newImage.src = (URL ?? "");
         });
     }
 
@@ -180,11 +190,13 @@ class ConverterTS {
     setTable(table: ReactElement<TableHTMLAttributes<any>>) { this.table = table; }
 
     convert() {
-        if (this.image === undefined) { throw Error("No input image found."); }
+        const IMAGE = this.getImage();
+
+        if (IMAGE === undefined) { throw Error("No input image found."); }
         if (this.canvas.current === undefined) { throw Error("No canvas found."); }
 
-        const WIDTH = Math.floor(this.image.width / this.settings.getCurrentScaleDownMultiplier());
-        const HEIGHT = Math.floor(this.image.height / this.settings.getCurrentScaleDownMultiplier());
+        const WIDTH = Math.floor(IMAGE.width / this.settings.getCurrentScaleDownMultiplier());
+        const HEIGHT = Math.floor(IMAGE.height / this.settings.getCurrentScaleDownMultiplier());
 
         // Set canvas size
         this.canvas.current.width = WIDTH;
@@ -195,7 +207,7 @@ class ConverterTS {
         if (CANVAS_CONTEXT === null) { throw Error("No canvas found."); }
         
         // Draw image to canvas
-        CANVAS_CONTEXT.drawImage(this.image, 0, 0, WIDTH, HEIGHT);
+        CANVAS_CONTEXT.drawImage(IMAGE, 0, 0, WIDTH, HEIGHT);
 
         // Get scaled image
         const SCALED_IMAGE = CANVAS_CONTEXT.getImageData(0, 0, WIDTH, HEIGHT);
@@ -216,71 +228,11 @@ interface ConverterDispatchAction {
     Convert?: { },
 }
 
-/**
- * Handles actions on the `Convereter` class.
- * @param state Current state of `Convereter`.
- * @param actions Array of actions to be executed. No more than one action should be defined per item.
- * @returns New `Converter` with actions performed on it.
- */
-function converterReducer(state: ConverterTS, actions: ConverterDispatchAction[]) {
-    let newState = new ConverterTS(
-        state.getSettingsCopy(),
-        state.canvas,
-        state.reader,
-        state.getFile(),
-        state.getImage(),
-        state.getTable(),
-    );
-
-    actions.forEach((action) => {
-        if (Object.values(action).length > 1) { throw Error("More than one action in an item was passed to the `Settings` dispatcher."); }
-
-        switch (true) {
-            case (action.SetScaleDownMultiplier !== undefined): {
-                newState.setScaleDownMultiplier(action.SetScaleDownMultiplier!.multiplier);
-                break;
-            }
-
-            case (action.SetInputFile !== undefined): {
-                newState.setFile(action.SetInputFile!.file);
-                break;
-            }
-
-            case (action.SetInputImageURL !== undefined): {
-                newState.setImageURL(action.SetInputImageURL!.URL).then(() => {
-                    action.SetInputImageURL!.then?.(newState);
-                });
-                break;
-            }
-
-            case (action.ImageURLSet !== undefined): {
-                break;
-            }
-
-            case (action.Convert !== undefined): {
-                newState.convert();
-                break;
-            }
-
-            default: { throw Error("Unknown converter dispatch action."); }
-        }
-    })
-    
-    return newState;
-}
-
 export default ConverterTS;
 export type { ConverterDispatchAction };
-export { converterReducer };
 
-export const ConverterContext = createContext<ConverterTS | undefined>(undefined);
-export function useConverterContext(): ConverterTS {
-    if (ConverterContext === undefined) { throw Error("SettingsContext is undefined."); }
+export const ConverterContext = createContext<MutableRefObject<ConverterTS> | undefined>(undefined);
+export function useConverterContext(): MutableRefObject<ConverterTS> {
+    if (ConverterContext === undefined) { throw Error("ConverterContext is undefined."); }
     return useContext(ConverterContext)!;
-}
-
-export const ConverterDispatchContext = createContext<Dispatch<ConverterDispatchAction[]> | undefined>(undefined);
-export function useConverterDispatchContext(): Dispatch<ConverterDispatchAction[]> {
-    if (ConverterDispatchContext === undefined) throw Error("SettingsDispatchContext is undefined.");
-    return useContext(ConverterDispatchContext)!;
 }
